@@ -39,6 +39,12 @@ dependencies:
   intl:
   http:
   flutter_gemini: ^3.0.0
+  circular_countdown_timer:
+  firebase_core:
+  firebase_storage:
+  cloud_firestore:
+  firebase_auth:
+  google_sign_in:
 
 
 dev_dependencies:

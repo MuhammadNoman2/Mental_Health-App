@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mental_health_app/screens/Wellness/widgets/mindfullness.dart';
+
+import 'widgets/resourses/books.dart';
+import 'widgets/resourses/hotline.dart';
+import 'widgets/resourses/therapist.dart';
+import 'widgets/selfcare/break.dart';
+import 'widgets/selfcare/diet.dart';
+import 'widgets/selfcare/excercise.dart';
+import 'widgets/selfcare/hydration.dart';
 
 class WellnessScreen extends StatelessWidget {
   const WellnessScreen({super.key});
@@ -103,7 +113,7 @@ class WellnessScreen extends StatelessWidget {
               const SizedBox(height: 15),
               ElevatedButton(
                 onPressed: () {
-                  // Navigate to meditation session
+                  Get.to(()=> MindfulnessScreen());
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
@@ -125,10 +135,26 @@ class WellnessScreen extends StatelessWidget {
 
   Widget _buildSelfCareSection() {
     final List<Map<String, dynamic>> selfCareTips = [
-      {"title": "Stay Hydrated", "icon": Icons.water_drop},
-      {"title": "Take a Break", "icon": Icons.beach_access},
-      {"title": "Eat Healthy", "icon": Icons.restaurant},
-      {"title": "Exercise Regularly", "icon": Icons.directions_run},
+      {
+        "title": "Stay Hydrated",
+        "icon": Icons.water_drop,
+        "navigateTo": () => Get.to(const HydrationScreen()), // Function that navigates
+      },
+      {
+        "title": "Take a Break",
+        "icon": Icons.beach_access,
+        "navigateTo": () => Get.to(const BreaksScreen()),
+      },
+      {
+        "title": "Eat Healthy",
+        "icon": Icons.restaurant,
+        "navigateTo": () => Get.to(const DietScreen()),
+      },
+      {
+        "title": "Exercise Regularly",
+        "icon": Icons.directions_run,
+        "navigateTo": () => Get.to(const ExerciseScreen()),
+      },
     ];
 
     return Column(
@@ -155,36 +181,39 @@ class WellnessScreen extends StatelessWidget {
           itemCount: selfCareTips.length,
           itemBuilder: (context, index) {
             final tip = selfCareTips[index];
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    tip["icon"],
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    tip["title"],
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+            return GestureDetector(
+              onTap: () => tip["navigateTo"](), // Call the navigation function
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.2),
+                      blurRadius: 10,
+                      spreadRadius: 1,
+                      offset: const Offset(0, 5),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      tip["icon"],
+                      color: Colors.blue,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      tip["title"],
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
@@ -209,59 +238,77 @@ class WellnessScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Column(
           children: [
-            _buildResourceTile("Mental Health Hotline", "Call for immediate help.", Icons.phone),
-            _buildResourceTile("Therapists Near You", "Find professionals to talk to.", Icons.map),
-            _buildResourceTile("Self-Help Books", "Recommended readings for wellness.", Icons.book),
+            _buildResourceTile(
+              "Mental Health Hotline",
+              "Call for immediate help.",
+              Icons.phone,
+              onTap: () => Get.to(() => const HotlineScreen()),
+            ),
+            _buildResourceTile(
+              "Therapists Near You",
+              "Find professionals to talk to.",
+              Icons.map,
+              onTap: () => Get.to(() => const TherapistsScreen()),
+            ),
+            _buildResourceTile(
+              "Self-Help Books",
+              "Recommended readings for wellness.",
+              Icons.book,
+              onTap: () => Get.to(() => const BooksScreen()),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildResourceTile(String title, String subtitle, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            blurRadius: 10,
-            spreadRadius: 1,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.blue, size: 40),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
+  Widget _buildResourceTile(String title, String subtitle, IconData icon, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 10,
+              spreadRadius: 1,
+              offset: const Offset(0, 5),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blue, size: 40),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,9 +5,11 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final IconData? icon;
+  final bool isLoading;
 
   const CustomButton({
     super.key,
+    required this.isLoading,
     required this.text,
     required this.onPressed,
     this.icon,
@@ -18,7 +20,7 @@ class CustomButton extends StatelessWidget {
     return SizedBox(
       width: MediaQuery.of(context).size.width * 40,
       child: ElevatedButton.icon(
-        onPressed: onPressed,
+       onPressed:  isLoading ? null : onPressed ,
         icon: icon != null ? Icon(icon) : const SizedBox.shrink(),
         label: Text(text),
         style: ElevatedButton.styleFrom(

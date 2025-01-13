@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "940350535313",
+    "project_id": "mental-health-support-f1958",
+    "storage_bucket": "mental-health-support-f1958.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:940350535313:android:4854776a7fd1ae931a7130",
+        "android_client_info": {
+          "package_name": "umair.info.mental_health_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCuQEEUe4r4dyWqQ-kkO_Hhyvtlba8Qcss"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

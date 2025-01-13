@@ -6,6 +6,7 @@ import 'package:mental_health_app/screens/Auth/sign_up.dart';
 import 'package:mental_health_app/screens/Home/dashboard.dart';
 import 'package:mental_health_app/utils/theme/colors.dart';
 import 'package:mental_health_app/utils/widgets/custom_button.dart';
+import '../../controllers/authController.dart';
 import '../../utils/widgets/custom_form_fields.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,8 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+  final AuthController authController = Get.put(AuthController());
   bool _isPasswordHidden = true;
 
   @override
@@ -88,14 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       CustomFormField(
-                        controller: emailController,
+                        controller: authController.emailController,
                         hintText: 'Email Address',
                         prefixIcon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 20),
                       CustomFormField(
-                        controller: passwordController,
+                        controller: authController.passwordController,
                         hintText: 'Password',
                         prefixIcon: Icons.lock,
                         obscureText: _isPasswordHidden,
@@ -134,17 +134,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomButton(
                         text: 'Login',
                         onPressed: () {
-                          // Handle login functionality
-                          Get.to(DashboardScreen());
-                        },
+                         authController.loginUser();
+                        }, isLoading: authController.isLoading.value,
                       ),
                       const SizedBox(height: 12),
                       CustomButton(
                         text: 'Login with Google',
                         icon: Icons.g_mobiledata,
                         onPressed: () {
-                          // Handle Google login
-                        },
+                          authController.googleSignIn();
+                        }, isLoading: authController.isLoading.value,
                       ),
                     ],
                   ),

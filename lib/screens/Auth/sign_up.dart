@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mental_health_app/controllers/authController.dart';
 import 'package:mental_health_app/screens/Auth/login.dart';
 import 'package:mental_health_app/screens/Home/dashboard.dart';
 import 'package:mental_health_app/utils/theme/colors.dart';
@@ -14,9 +15,7 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+final AuthController authController = Get.put(AuthController());
   bool _isPasswordHidden = true;
 
   @override
@@ -86,15 +85,23 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: Column(
                     children: [
                       CustomFormField(
-                        controller: emailController,
-                        hintText: 'Email Address',
-                        prefixIcon: Icons.email,
+                        controller: authController.fullNameController,
+                        hintText: 'Full Name',
+                        prefixIcon: Icons.person,
                         keyboardType: TextInputType.emailAddress,
                       ),
             
                 const SizedBox(height: 20),
+                      CustomFormField(
+                        controller: authController.emailController,
+                        hintText: 'Email Address',
+                        prefixIcon: Icons.email,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+
+                const SizedBox(height: 20),
                 CustomFormField(
-                  controller: passwordController,
+                  controller: authController.passwordController,
                   hintText: 'Password',
                   prefixIcon: Icons.lock,
                   obscureText: _isPasswordHidden,
@@ -111,7 +118,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ),
                 const SizedBox(height: 20),
                 CustomFormField(
-                  controller: confirmPasswordController,
+                  controller: authController.confirmPasswordController,
                   hintText: 'Confirm Password',
                   prefixIcon: Icons.lock,
                   obscureText: _isPasswordHidden,
@@ -120,9 +127,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 CustomButton(
                   text: 'Sign Up',
                   onPressed: () {
-                    // Handle signup functionality
-                    Get.to(DashboardScreen());
-                  },
+                    authController.signUpUser();
+                  }, isLoading: authController.isLoading.value,
+
                 ),
                     ],
                   ),

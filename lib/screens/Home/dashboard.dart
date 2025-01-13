@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:mental_health_app/screens/Profile/profile.dart';
 import 'package:mental_health_app/screens/Wellness/wellness_screen.dart';
 
 import '../../controllers/chatController.dart';
+import '../../services/userService.dart';
 import '../ChatScreen/chat_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
+
+
   const DashboardScreen({super.key});
 
   @override
@@ -14,6 +18,13 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final UserController userController = Get.put(UserController());
+
+  String getFormattedDateTime() {
+    final DateTime now = DateTime.now();
+    return DateFormat("dd-MMM-yy , HH:mm").format(now);
+  }
+
   int _selectedIndex = 0;
   String _selectedMood = "Excellent";
 
@@ -61,7 +72,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
               _buildCategories(),
               const SizedBox(height: 20),
-              _buildChatHistory(),
+              Expanded(child: _buildChatHistory()),
             ],
           ),
         ),
@@ -79,8 +90,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Hi, Umair!",
+               Text(
+                "Hi, ${userController.userName.value}",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -88,7 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 ),
               ),
               Text(
-                "${DateTime.now().toLocal()}".split(' ')[0],
+                getFormattedDateTime(),
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.grey,
@@ -213,57 +224,117 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildChatHistory() {
-    final ChatController _controller = Get.put(ChatController());
+    final UserController _controller = Get.put(UserController());
 
-    return Expanded(
-      child: Obx(() {
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: _controller.chatHistory.length,
-          itemBuilder: (context, sessionIndex) {
-            final session = _controller.chatHistory[sessionIndex];
-            final summary = session.map((message) => message.message).join("\n");
+    // Fetch chat history when the widget is first built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _controller.fetchChatHistory();
+    });
 
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(15),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 10,
-                    spreadRadius: 1,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Session ${sessionIndex + 1}",
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Text(
+            "Chat History",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            if (_controller.isFetchingHistory.value) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (_controller.fetchErrorMessage.value.isNotEmpty) {
+              return Center(
+                child: Text(
+                  _controller.fetchErrorMessage.value,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            }
+
+            if (_controller.chatHistory.isEmpty) {
+              return const Center(
+                child: Text(
+                  "No chat history available.",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _controller.chatHistory.length,
+              itemBuilder: (context, sessionIndex) {
+                final session = _controller.chatHistory[sessionIndex];
+                final messages = session['messages'] as List<dynamic>;
+
+                return GestureDetector(
+                  onTap: () {
+                    // Navigate to chat screen with specific conversation/session
+                    Get.toNamed('/chat', arguments: {
+                      'sessionIndex': sessionIndex,
+                      'messages': messages,
+                    });
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Session ${sessionIndex + 1}",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        // Iterate through the messages and return a Widget list
+                        ...messages.map((message) {
+                          final userMessage = message['message'] ?? "No user message";
+                          final sender = message['sender'] ?? "Unknown";
+                          final time = message['time'] ?? "No time";
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "$sender ($time): $userMessage",
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                              const SizedBox(height: 5),
+                            ],
+                          );
+                        }).toList(), // Convert the iterable to a list of widgets
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 5),
-                  Text(
-                    summary,
-                    style: const TextStyle(
-                      color: Colors.grey,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                );
+              },
             );
-          },
-        );
-      }),
+          }),
+        ),
+      ],
     );
   }
 

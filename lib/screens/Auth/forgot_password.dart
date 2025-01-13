@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../controllers/authController.dart';
 import '../../utils/theme/colors.dart';
 import '../../utils/widgets/custom_button.dart';
 import '../../utils/widgets/custom_form_fields.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
+  final AuthController authController = Get.put(AuthController());
 
   ForgotPasswordScreen({super.key});
 
@@ -62,7 +63,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                   const SizedBox(height: 40),
                   // Email Form Field
                   CustomFormField(
-                    controller: emailController,
+                    controller: authController.emailController,
                     hintText: 'Email Address',
                     prefixIcon: Icons.email,
                     keyboardType: TextInputType.emailAddress,
@@ -73,7 +74,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     text: 'Send Reset Link',
                     onPressed: () {
                       // Handle Forgot Password functionality
-                    },
+                    }, isLoading: authController.isLoading.value,
                   ),
                   const SizedBox(height: 20),
                   // Back to Login

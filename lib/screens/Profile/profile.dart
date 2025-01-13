@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '../../services/userService.dart';
+
+final UserController userController = Get.put(UserController());
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: const Color(0xFFE8F0FE),
       appBar: AppBar(
@@ -69,8 +75,8 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           // User Name
-          const Text(
-            "Muhammad Umair",
+           Text(
+            "${userController.userName.value}",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -78,8 +84,8 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           // User Email
-          const Text(
-            "m.umair123@example.com",
+           Text(
+            "${userController.email.value}",
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey,
