@@ -12,7 +12,20 @@
           "package_name": "umair.info.mental_health_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "940350535313-iksvgiga9eecr9nqbvi82om96n4km7o4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "umair.info.mental_health_app",
+            "certificate_hash": "77ac652c60e4be06654da40ea0b56209092c8a96"
+          }
+        },
+        {
+          "client_id": "940350535313-86gmo3a2joakqoka5vra332ev529g9km.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCuQEEUe4r4dyWqQ-kkO_Hhyvtlba8Qcss"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "940350535313-86gmo3a2joakqoka5vra332ev529g9km.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
