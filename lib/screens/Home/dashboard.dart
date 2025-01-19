@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -83,7 +85,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildAppBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -91,7 +93,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
                Text(
-                "Hi, ${userController.userName.value}",
+                "Hi, ${authController.userName.value}",
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -107,10 +109,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
-          IconButton(
-            icon: const Icon(Icons.notifications, color: Colors.black),
-            onPressed: () {},
-          ),
+            GestureDetector(
+              onTap: () => Get.to(() => ProfileScreen()),
+              child: Obx(() {
+                return CircleAvatar(
+                  backgroundImage: authController.profileImage.value.isEmpty
+                      ? const AssetImage('assets/images/avatar_person.png')
+                      : FileImage(File(authController.profileImage.value)) as ImageProvider,
+                );
+              }),
+            ),
         ],
       ),
     );
@@ -224,11 +232,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildChatHistory() {
-    final UserController _controller = Get.put(UserController());
 
     // Fetch chat history when the widget is first built
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _controller.fetchChatHistory();
+      authController.fetchChatHistory();
     });
 
     return Column(
@@ -246,20 +253,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         Expanded(
           child: Obx(() {
-            if (_controller.isFetchingHistory.value) {
+            if (authController.isFetchingHistory.value) {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (_controller.fetchErrorMessage.value.isNotEmpty) {
+            if (authController.fetchErrorMessage.value.isNotEmpty) {
               return Center(
                 child: Text(
-                  _controller.fetchErrorMessage.value,
+                  authController.fetchErrorMessage.value,
                   style: const TextStyle(color: Colors.red),
                 ),
               );
             }
 
-            if (_controller.chatHistory.isEmpty) {
+            if (authController.chatHistory.isEmpty) {
               return const Center(
                 child: Text(
                   "No chat history available.",
@@ -270,9 +277,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             return ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: _controller.chatHistory.length,
+              itemCount: authController.chatHistory.length,
               itemBuilder: (context, sessionIndex) {
-                final session = _controller.chatHistory[sessionIndex];
+                final session = authController.chatHistory[sessionIndex];
                 final messages = session['messages'] as List<dynamic>;
 
                 return GestureDetector(

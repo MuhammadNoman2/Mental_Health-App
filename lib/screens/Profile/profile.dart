@@ -1,16 +1,20 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mental_health_app/controllers/authController.dart';
+import 'package:mental_health_app/utils/widgets/personInfo_form.dart';
 
 import '../../services/userService.dart';
+import '../../utils/widgets/image_picker.dart';
 
-final UserController userController = Get.put(UserController());
-
+final AuthController authController = Get.put(AuthController());
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+   ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xFFE8F0FE),
       appBar: AppBar(
@@ -37,16 +41,12 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Profile Header
-                _buildProfileHeader(),
+                _buildProfileHeader(context),
                 const SizedBox(height: 20),
-                // Personal Info Section
-                _buildPersonalInfoSection(),
+               _buildPersonalInfoSection(),
                 const SizedBox(height: 20),
-                // Settings Section
                 _buildSettingsSection(),
                 const SizedBox(height: 20),
-                // Logout Button
                 _buildLogoutButton(context),
               ],
             ),
@@ -56,89 +56,89 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(BuildContext context) {
     return Center(
       child: Column(
         children: [
-          // Profile Picture
-          Container(
-            height: 100,
-            width: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.blue, width: 2),
-              image: const DecorationImage(
-                image: AssetImage('assets/images/img_7.png'), // Replace with your asset
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
+        Obx(() => CircleAvatar(
+          radius: 50,
+          backgroundImage: authController.profileImage.value.isEmpty
+              ? const AssetImage('assets/images/avatar_person.png')
+              : FileImage(File(authController.profileImage.value)) as ImageProvider,
+                ),
+        ),
           const SizedBox(height: 10),
-          // User Name
-           Text(
-            "${userController.userName.value}",
-            style: TextStyle(
+          Text(
+            "${authController.userName.value}",
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.black,
             ),
           ),
-          // User Email
-           Text(
-            "${userController.email.value}",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
+          Obx(() {
+            if (authController.isGoogleSignIn.value) {
+              return Image.asset('assets/images/google_sign.png', height: 20);
+            }
+            return Text(
+              "${authController.email.value}",
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _buildPersonalInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Personal Information",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _buildInfoTile(Icons.cake, "Date of Birth", "12th June 1995"),
-        const Divider(color: Colors.grey),
-        _buildInfoTile(Icons.male, "Gender", "Male"),
-        const Divider(color: Colors.grey),
-        _buildInfoTile(Icons.phone, "Phone Number", "+1 234 567 890"),
-      ],
-    );
-  }
+   Widget _buildPersonalInfoSection() {
 
-  Widget _buildInfoTile(IconData icon, String title, String value) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: Colors.blue),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
-      subtitle: Text(
-        value,
-        style: const TextStyle(
-          fontSize: 14,
-          color: Colors.grey,
-        ),
-      ),
-    );
-  }
+     return Obx(() {
+       return Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           const Text(
+             "Personal Information",
+             style: TextStyle(
+               fontSize: 18,
+               fontWeight: FontWeight.bold,
+               color: Colors.black,
+             ),
+           ),
+           const SizedBox(height: 10),
+           _buildInfoTile(Icons.cake, "Date of Birth", authController.dateOfBirth.value),
+           const Divider(color: Colors.grey),
+           _buildInfoTile(Icons.male, "Gender", authController.gender.value),
+           const Divider(color: Colors.grey),
+           _buildInfoTile(Icons.phone, "Phone Number", authController.phoneNumber.value),
+         ],
+       );
+     });
+   }
+
+   Widget _buildInfoTile(IconData icon, String title, String value) {
+     return ListTile(
+       contentPadding: EdgeInsets.zero,
+       leading: Icon(icon, color: Colors.blue),
+       title: Text(
+         title,
+         style: const TextStyle(
+           fontSize: 16,
+           fontWeight: FontWeight.bold,
+           color: Colors.black,
+         ),
+       ),
+       subtitle: Text(
+         value,
+         style: const TextStyle(
+           fontSize: 14,
+           color: Colors.grey,
+         ),
+       ),
+     );
+   }
 
   Widget _buildSettingsSection() {
     return Column(
@@ -153,32 +153,31 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        _buildSettingTile(Icons.lock, "Change Password", Colors.purple),
-        _buildSettingTile(Icons.palette, "Appearance", Colors.orange),
-        _buildSettingTile(Icons.notifications, "Notifications", Colors.green),
-        _buildSettingTile(Icons.privacy_tip, "Privacy Policy", Colors.red),
+        _buildSettingTile(CupertinoIcons.profile_circled, "Update Profile", Colors.purple, ()=> Get.to((UpdateProfileScreen()))),
+        _buildSettingTile(Icons.palette, "Appearance", Colors.orange,  ()=> Get.to((UpdateProfileScreen()))),
+        _buildSettingTile(Icons.notifications, "Notifications", Colors.green, ()=> Get.to((UpdateProfileScreen()))),
+        _buildSettingTile(Icons.privacy_tip, "Privacy Policy", Colors.red, ()=> Get.to((UpdateProfileScreen()))),
       ],
     );
   }
 
-  Widget _buildSettingTile(IconData icon, String title, Color iconColor) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: iconColor),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
-      onTap: () {
-        // Handle settings tap
-      },
-    );
-  }
+   Widget _buildSettingTile(IconData icon, String title, Color iconColor, VoidCallback onTap) {
+     return ListTile(
+       contentPadding: EdgeInsets.zero,
+       leading: Icon(icon, color: iconColor),
+       title: Text(
+         title,
+         style: const TextStyle(
+           fontSize: 16,
+           fontWeight: FontWeight.bold,
+           color: Colors.black,
+         ),
+       ),
+       trailing: const Icon(Icons.arrow_forward_ios, color: Colors.grey),
+       onTap: onTap, // Passing the onTap action
+     );
+   }
+
 
   Widget _buildLogoutButton(BuildContext context) {
     return Padding(
@@ -186,7 +185,6 @@ class ProfileScreen extends StatelessWidget {
       child: Center(
         child: ElevatedButton(
           onPressed: () {
-            // Handle logout
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
@@ -201,7 +199,7 @@ class ProfileScreen extends StatelessWidget {
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      // Redirect to login screen
+                      authController.logoutUser();
                     },
                     child: const Text("Logout"),
                   ),

@@ -45,6 +45,8 @@ dependencies:
   cloud_firestore:
   firebase_auth:
   google_sign_in:
+  image_picker:
+  permission_handler:
 
 
 dev_dependencies:
