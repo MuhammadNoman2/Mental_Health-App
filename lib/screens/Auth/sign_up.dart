@@ -15,8 +15,9 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-final AuthController authController = Get.put(AuthController());
+  final AuthController authController = Get.put(AuthController());
   bool _isPasswordHidden = true;
+  bool _isConfirmPasswordHidden = true;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +68,8 @@ final AuthController authController = Get.put(AuthController());
                   ),
                 ),
                 const SizedBox(height: 40),
-                Container( margin: const EdgeInsets.symmetric(horizontal: 20),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: Colors.transparent,
@@ -90,47 +92,74 @@ final AuthController authController = Get.put(AuthController());
                         prefixIcon: Icons.person,
                         keyboardType: TextInputType.emailAddress,
                       ),
-            
-                const SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       CustomFormField(
                         controller: authController.emailController,
                         hintText: 'Email Address',
                         prefixIcon: Icons.email,
                         keyboardType: TextInputType.emailAddress,
                       ),
-
-                const SizedBox(height: 20),
-                CustomFormField(
-                  controller: authController.passwordController,
-                  hintText: 'Password',
-                  prefixIcon: Icons.lock,
-                  obscureText: _isPasswordHidden,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _isPasswordHidden ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordHidden = !_isPasswordHidden;
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(height: 20),
-                CustomFormField(
-                  controller: authController.confirmPasswordController,
-                  hintText: 'Confirm Password',
-                  prefixIcon: Icons.lock,
-                  obscureText: _isPasswordHidden,
-                ),
-                const SizedBox(height: 30),
-                CustomButton(
-                  text: 'Sign Up',
-                  onPressed: () {
-                    authController.signUpUser();
-                  }, isLoading: authController.isLoading.value,
-
-                ),
+                      const SizedBox(height: 20),
+                      CustomFormField(
+                        controller: authController.passwordController,
+                        hintText: 'Password',
+                        prefixIcon: Icons.lock,
+                        obscureText: _isPasswordHidden,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isPasswordHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isPasswordHidden = !_isPasswordHidden;
+                            });
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      CustomFormField(
+                        controller: authController.confirmPasswordController,
+                        hintText: 'Confirm Password',
+                        prefixIcon: Icons.lock,
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isConfirmPasswordHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isConfirmPasswordHidden = !_isConfirmPasswordHidden;
+                            });
+                          },
+                        ),
+                        obscureText: _isConfirmPasswordHidden,
+                      ),
+                      const SizedBox(height: 30),
+                      Obx(
+                        () => authController.isLoading.value
+                            ? const CircularProgressIndicator()
+                            : CustomButton(
+                                onPressed: () {
+                                  // Set loading to true
+                                  authController.isLoading.value = true;
+                                  authController.signUpUser().then((_) {
+                                    // Set loading to false after saving is complete
+                                    authController.isLoading.value = false;
+                                  }).catchError((error) {
+                                    // Handle error and reset loading state
+                                    authController.isLoading.value = false;
+                                    Get.snackbar(
+                                        "Error", "Failed to save info: $error");
+                                  });
+                                },
+                                isLoading:
+                                    false, // `CustomButton` handles its loading internally if needed
+                                text: 'SIGN UP',
+                              ),
+                      ),
                     ],
                   ),
                 ),
@@ -143,13 +172,17 @@ final AuthController authController = Get.put(AuthController());
                     text: TextSpan(
                       text: 'Already have an account? ',
                       style: TextStyle(
-                        color: Get.isDarkMode ? Colors.grey[300] : Colors.grey[600],
+                        color: Get.isDarkMode
+                            ? Colors.grey[300]
+                            : Colors.grey[600],
                       ),
                       children: [
                         TextSpan(
                           text: 'Login',
                           style: TextStyle(
-                            color: Get.isDarkMode ? Colors.tealAccent : Colors.teal,
+                            color: Get.isDarkMode
+                                ? Colors.tealAccent
+                                : Colors.teal,
                             fontWeight: FontWeight.bold,
                           ),
                         ),

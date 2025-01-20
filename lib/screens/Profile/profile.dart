@@ -6,8 +6,8 @@ import 'package:get/get.dart';
 import 'package:mental_health_app/controllers/authController.dart';
 import 'package:mental_health_app/utils/widgets/personInfo_form.dart';
 
-import '../../services/userService.dart';
-import '../../utils/widgets/image_picker.dart';
+import 'feedback.dart';
+import 'privacy_policy.dart';
 
 final AuthController authController = Get.put(AuthController());
 class ProfileScreen extends StatelessWidget {
@@ -154,9 +154,10 @@ class ProfileScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _buildSettingTile(CupertinoIcons.profile_circled, "Update Profile", Colors.purple, ()=> Get.to((UpdateProfileScreen()))),
-        _buildSettingTile(Icons.palette, "Appearance", Colors.orange,  ()=> Get.to((UpdateProfileScreen()))),
-        _buildSettingTile(Icons.notifications, "Notifications", Colors.green, ()=> Get.to((UpdateProfileScreen()))),
-        _buildSettingTile(Icons.privacy_tip, "Privacy Policy", Colors.red, ()=> Get.to((UpdateProfileScreen()))),
+        //_buildSettingTile(Icons.palette, "Appearance", Colors.orange,  ()=> Get.to((UpdateProfileScreen()))),
+       // _buildSettingTile(Icons.notifications, "Notifications", Colors.green, ()=> Get.to((UpdateProfileScreen()))),
+        _buildSettingTile(Icons.privacy_tip, "Privacy Policy", Colors.red, () => Get.to(PrivacyPolicyScreen())),
+        _buildSettingTile(Icons.feedback, "Feedback", Colors.blue, () => Get.to(FeedbackScreen())),
       ],
     );
   }
@@ -183,12 +184,12 @@ class ProfileScreen extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
       child: Center(
-        child: ElevatedButton(
+        child: OutlinedButton(
           onPressed: () {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                backgroundColor: Colors.red[50],
+                backgroundColor: Colors.red.shade50,
                 title: const Text("Logout"),
                 content: const Text("Are you sure you want to logout?"),
                 actions: [
@@ -207,8 +208,8 @@ class ProfileScreen extends StatelessWidget {
               ),
             );
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red[100],
+          style: OutlinedButton.styleFrom(
+            side:BorderSide(style: BorderStyle.solid, color: Colors.red),
             minimumSize: Size(300, 50),
             padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
             shape: RoundedRectangleBorder(

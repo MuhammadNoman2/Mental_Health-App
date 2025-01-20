@@ -18,12 +18,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
   final TextEditingController genderController = TextEditingController();
   final TextEditingController phoneNumberController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold( // Add Scaffold here
       appBar: AppBar(
         title: const Text("Update Profile"),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.teal.shade200,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -89,19 +90,32 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               ),
               const SizedBox(height: 30),
 
-
-              CustomButton(
+              Obx(() => authController.isLoading.value
+                  ? const CircularProgressIndicator()
+                  : CustomButton(
                 onPressed: () {
+                  // Set loading to true
+                  authController.isLoading.value = true;
+
                   // Save updated personal info
                   authController.savePersonalInfo(
                     dateOfBirthController.text.trim(),
                     genderController.text.trim(),
                     phoneNumberController.text.trim(),
-                  );
+                  ).then((_) {
+                    // Set loading to false after saving is complete
+                    authController.isLoading.value = false;
+                  }).catchError((error) {
+                    // Handle error and reset loading state
+                    authController.isLoading.value = false;
+                    Get.snackbar("Error", "Failed to save info: $error");
+                  });
                 },
-                isLoading: authController.isLoading.value,
+                isLoading: false, // `CustomButton` handles its loading internally if needed
                 text: 'Save',
               ),
+              )
+
             ],
           ),
         ),

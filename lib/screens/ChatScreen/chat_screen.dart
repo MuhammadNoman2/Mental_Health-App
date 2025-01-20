@@ -84,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
           CircleAvatar(
             radius: 22,
             backgroundColor: Colors.blue.shade100,
-            child: const Icon(Icons.person, color: Colors.blue),
+            child: Image.asset( 'assets/images/img_8.png'),
           ),
           const SizedBox(width: 10),
           const Expanded(
@@ -94,7 +94,9 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+
+            },
             icon: const Icon(Icons.more_vert_sharp),
           ),
         ],

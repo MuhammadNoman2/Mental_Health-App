@@ -115,7 +115,7 @@ class ChatController extends GetxController {
     try {
       // Send user message to Gemini API
       Gemini.instance.prompt(parts: [
-        Part.text("Please provide a detailed response (max 100 words) related to '$userMessage'. Keep it focused on the context."),
+        Part.text("Please provide a detailed response (max 100 words) related to '$userMessage' "),
       ]).then((value) async {
         if (value != null) {
           String botResponse = value.output ?? "No response from Gemini";

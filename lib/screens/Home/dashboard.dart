@@ -6,8 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:mental_health_app/screens/Profile/profile.dart';
 import 'package:mental_health_app/screens/Wellness/wellness_screen.dart';
 
-import '../../controllers/chatController.dart';
-import '../../services/userService.dart';
+import '../../controllers/authController.dart';
 import '../ChatScreen/chat_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -20,7 +19,9 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final UserController userController = Get.put(UserController());
+
+  final AuthController authController = Get.put(AuthController());
+
 
   String getFormattedDateTime() {
     final DateTime now = DateTime.now();
