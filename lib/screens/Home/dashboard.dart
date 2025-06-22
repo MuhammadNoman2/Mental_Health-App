@@ -5,12 +5,10 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mental_health_app/screens/Profile/profile.dart';
 import 'package:mental_health_app/screens/Wellness/wellness_screen.dart';
-
 import '../../controllers/authController.dart';
 import '../ChatScreen/chat_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
-
 
   const DashboardScreen({super.key});
 
@@ -25,7 +23,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   String getFormattedDateTime() {
     final DateTime now = DateTime.now();
-    return DateFormat("dd-MMM-yy , HH:mm").format(now);
+    return DateFormat("dd-MMM-yy , h:mm a").format(now);
   }
 
   int _selectedIndex = 0;

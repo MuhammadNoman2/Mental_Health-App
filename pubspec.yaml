@@ -48,6 +48,7 @@ dependencies:
   image_picker:
   permission_handler:
   shared_preferences:
+  flutter_markdown: ^0.7.7
 
 
 dev_dependencies:

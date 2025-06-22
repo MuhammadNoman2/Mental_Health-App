@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:mental_health_app/controllers/authController.dart';
 import 'package:mental_health_app/screens/Profile/profile.dart';
 import '../Home/dashboard.dart';
-import 'onboarding_screen.dart'; // Update with the correct route if needed.
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,9 +24,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Load profile image
-    authController.loadProfileImage();
-
     // Initialize the animation controller
     _controller = AnimationController(
       vsync: this,
@@ -36,19 +33,41 @@ class _SplashScreenState extends State<SplashScreen>
     // Define the animation with ease-out
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
-    // Delay navigation for 8 seconds
-    Future.delayed(const Duration(seconds: 8), () {
-      // Check if user is logged in
-      if (FirebaseAuth.instance.currentUser != null) {
-        // Navigate to Dashboard if logged in
-        Get.off(() => DashboardScreen());
-      } else {
-        // Navigate to Onboarding screen if not logged in
-        Get.off(() => OnboardingScreen());
-      }
-    });
+    // Handle auto-login after animation and minimum splash time
+    _handleAutoLogin();
   }
 
+  Future<void> _handleAutoLogin() async {
+    // Wait for minimum splash screen duration
+    await Future.delayed(const Duration(seconds: 3));
+
+    // Check if user is logged in
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser != null) {
+      try {
+        // Load user data first
+        await authController.fetchUserData();
+        await authController.loadPersonalInfo();
+        await authController.loadProfileImage();
+
+        // Navigate to dashboard if user data is loaded successfully
+        if (authController.userName.value.isNotEmpty) {
+          Get.off(() => const DashboardScreen());
+        } else {
+          // If user data is incomplete, go to onboarding
+          Get.off(() => const OnboardingScreen());
+        }
+      } catch (e) {
+        print("Error loading user data: $e");
+        // If there's an error, go to onboarding
+        Get.off(() => const OnboardingScreen());
+      }
+    } else {
+      // No user logged in, go to onboarding
+      Get.off(() => const OnboardingScreen());
+    }
+  }
 
   @override
   void dispose() {
@@ -78,7 +97,7 @@ class _SplashScreenState extends State<SplashScreen>
                   backgroundColor: Colors.teal[200],
                   child: Icon(
                     Icons.self_improvement_outlined,
-                    size: 150, // Increased size for a bold appearance
+                    size: 150,
                     color: Colors.blue.shade900,
                   ),
                 ),
@@ -101,6 +120,11 @@ class _SplashScreenState extends State<SplashScreen>
                   color: Colors.blue.shade900,
                   fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 40),
+              // Optional: Add a loading indicator
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade900),
               ),
             ],
           ),

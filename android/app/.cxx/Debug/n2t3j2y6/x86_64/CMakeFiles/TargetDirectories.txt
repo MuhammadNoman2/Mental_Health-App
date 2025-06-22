@@ -1,0 +1,2 @@
+/Users/macbookpro/Desktop/Mental_Health-App/android/app/.cxx/Debug/n2t3j2y6/x86_64/CMakeFiles/edit_cache.dir
+/Users/macbookpro/Desktop/Mental_Health-App/android/app/.cxx/Debug/n2t3j2y6/x86_64/CMakeFiles/rebuild_cache.dir

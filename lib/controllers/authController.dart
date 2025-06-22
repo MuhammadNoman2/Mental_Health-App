@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mental_health_app/screens/Home/dashboard.dart';
+import 'package:mental_health_app/screens/Presentation/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/Auth/login.dart';
 
@@ -32,36 +33,33 @@ class AuthController extends GetxController {
   var phoneNumber = ''.obs;
   var isDataSaved = false.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    fetchUserData();
-    loadPersonalInfo();
-    loadProfileImage();
-    autoLogin();
-  }
 
-  // Automatically login if the user is already authenticated
   Future<void> autoLogin() async {
     final User? currentUser = _auth.currentUser;
 
-    if (currentUser != null) {
-      try {
-        // Fetch user data from Firestore
-        await fetchUserData();
+    if (currentUser == null) {
+      print("No user is logged in.");
+      return;
+    }
 
-        // Ensure critical data is loaded before routing
+    final String uid = currentUser.uid;
+
+    if (uid.isNotEmpty) {
+      try {
+        await fetchUserData();
+        await loadPersonalInfo();
+        await loadProfileImage();
+
         if (userName.value.isNotEmpty) {
-          Get.off(() => DashboardScreen());
+          // Don't navigate here - let SplashScreen handle navigation
+          print("User data loaded successfully for: ${userName.value}");
         } else {
           throw Exception("User data is incomplete.");
         }
       } catch (e) {
         print("Error during auto-login: $e");
-        Get.off(() => LoginScreen());
+        throw e; // Re-throw to let SplashScreen handle the error
       }
-    } else {
-      Get.off(() => LoginScreen());
     }
   }
 
@@ -429,4 +427,29 @@ class AuthController extends GetxController {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('profileImage');
   }
+
+  void handleLogin() {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+    loginUser().then((_) {
+      isLoading.value = false;
+    }).catchError((error) {
+      isLoading.value = false;
+      Get.snackbar("Error", "Failed to save info: $error");
+    });
+  }
+
+  void handleGoogleLogin() {
+    if (isGoogleLoading.value) return;
+
+    isGoogleLoading.value = true;
+    googleSignIn().then((_) {
+      isGoogleLoading.value = false;
+    }).catchError((error) {
+      isGoogleLoading.value = false;
+      Get.snackbar("Error", "Google sign-in failed: $error");
+    });
+  }
+
 }

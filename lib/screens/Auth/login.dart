@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthController authController = Get.put(AuthController());
   bool _isPasswordHidden = true;
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,18 +136,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       Obx(() => authController.isLoading.value
                           ? const CircularProgressIndicator()
                           : CustomButton(
-                        onPressed: () {
-                          // Set loading to true
-                          authController.isLoading.value = true;
-                          authController.loginUser().then((_) {
-                            // Set loading to false after saving is complete
-                            authController.isLoading.value = false;
-                          }).catchError((error) {
-                            // Handle error and reset loading state
-                            authController.isLoading.value = false;
-                            Get.snackbar("Error", "Failed to save info: $error");
-                          });
-                        },
+                        onPressed: authController.handleLogin,
+
                         isLoading: false, // `CustomButton` handles its loading internally if needed
                         text: 'LOGIN',
                       ),
@@ -157,19 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? const CircularProgressIndicator()
                           : CustomButton(
                         icon: Icons.g_mobiledata,
-                        onPressed: () {
-                          // Set loading to true
-                          authController.isGoogleLoading.value = true;
-                          // Save updated personal info
-                          authController.googleSignIn().then((_) {
-                            // Set loading to false after saving is complete
-                            authController.isGoogleLoading.value = false;
-                          }).catchError((error) {
-                            // Handle error and reset loading state
-                            authController.isGoogleLoading.value = false;
-                            Get.snackbar("Error", "Failed to save info: $error");
-                          });
-                        },
+                        onPressed: authController.handleGoogleLogin,
                         isLoading: false, // `CustomButton` handles its loading internally if needed
                         text: 'Login with Google',
                       ),

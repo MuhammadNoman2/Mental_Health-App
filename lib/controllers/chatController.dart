@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../models/message.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 
@@ -10,6 +13,9 @@ class ChatController extends GetxController {
   final TextEditingController messageController = TextEditingController();
   final RxBool isLoading = false.obs;
   final RxString errorMessage = "".obs;
+  final RxString selectedAI = "Gemini".obs;
+
+  late var modelChatResponse = "";
 
   // Firestore and Firebase Auth instances
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -113,33 +119,106 @@ class ChatController extends GetxController {
     errorMessage.value = "";
 
     try {
-      // Send user message to Gemini API
-      Gemini.instance.prompt(parts: [
-        Part.text("Please provide a detailed response (max 100 words) related to '$userMessage' "),
-      ]).then((value) async {
-        if (value != null) {
-          String botResponse = value.output ?? "No response from Gemini";
+      if (selectedAI.value == "Gemini")
+        {
+          // Send user message to Gemini API
+          Gemini.instance.prompt(parts: [
+            Part.text("Please provide a detailed response (max 100 words) related to '$userMessage' "),
+          ]).then((value) async {
+            if (value != null) {
+              String botResponse = value.output ?? "No response from Gemini";
 
-          // Add bot response to the session
+              // Add bot response to the session
+              final botMessageModel = Message(
+                sender: "Gemini",
+                message: botResponse,
+                time: "${TimeOfDay.now().hour}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}",
+              );
+              messages.add(botMessageModel);
+
+              // Save the updated session to Firestore
+              await saveSessionToFirestore();
+            } else {
+              errorMessage.value = "No response from Gemini.";
+            }
+          });
+        }
+      else
+        {
+          // Use your own API call instead
+          final botResponse = await getTriotechPineconeResponse(userMessage);
+
           final botMessageModel = Message(
-            sender: "Gemini",
+            sender: "Your Psychologist",
             message: botResponse,
             time: "${TimeOfDay.now().hour}:${TimeOfDay.now().minute.toString().padLeft(2, '0')}",
           );
           messages.add(botMessageModel);
-
-          // Save the updated session to Firestore
           await saveSessionToFirestore();
-        } else {
-          errorMessage.value = "No response from Gemini.";
         }
-      });
+
     } catch (e) {
       errorMessage.value = "Failed to connect to Gemini: $e";
     } finally {
       isLoading.value = false;
     }
   }
+
+  Future<String> getTriotechPineconeResponse(String prompt) async {
+    final uriChat = Uri.parse("http://192.168.18.86:5000/chat");
+
+    try {
+      var chatResponse = await http.post(
+        uriChat,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"query": prompt}),
+      );
+
+      if (chatResponse.statusCode != 200) {
+        throw Exception("Failed at /chat: ${chatResponse.body}");
+      }
+
+      final chatResult = jsonDecode(chatResponse.body);
+      modelChatResponse = chatResult["pinecone_response"] ?? "";
+
+      // 👇 Handle default response when no match is found
+      if (modelChatResponse.trim().toLowerCase() == "no match found.") {
+        return "I'm here to support your mental well-being. You can ask me about stress, anxiety, depression, relationships, or anything you're feeling. How can I help you today?";
+      }
+
+      return modelChatResponse;
+
+    } catch (e) {
+      return "Oops! Something went wrong. Please try again later or ask me anything related to your mental well-being.";
+    }
+  }
+
+
+  Future<String> getTriotechSolution() async {
+    final uri = Uri.parse("http://192.168.18.86:5000/solution");
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({"pinecone_response": modelChatResponse}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data["solution"] ?? "No solution returned.";
+      } else {
+        throw Exception("Solution API failed: ${response.statusCode}");
+      }
+    } catch (e) {
+      return "Error: ${e.toString()}";
+    }
+  }
+
+
+
+
+
 
   /// Handle mood or category input and start a session
   void processMoodOrCategory(String userInput) {
